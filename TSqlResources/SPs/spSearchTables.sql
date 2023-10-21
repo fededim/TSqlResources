@@ -8,6 +8,8 @@ CREATE OR ALTER PROCEDURE spSearchTables
 AS
 BEGIN
 
+SET CONCAT_NULL_YIELDS_NULL OFF
+
 -- Create output temporary table
 CREATE TABLE #Output
 (
@@ -15,60 +17,83 @@ CREATE TABLE #Output
  [Schema] nvarchar(100),
  [Table] nvarchar(100),
  [Column] nvarchar(100),
- [FullTableName] nvarchar(400)
+ [FullTableName] nvarchar(300),
+ [FullSelect] nvarchar(300),
 )
 
-DECLARE @statement NVARCHAR(max) = N'
+DECLARE @outerDbName nvarchar(100)
+
+DECLARE @statement NVARCHAR(MAX) = N'
 USE [?]
 
-IF DB_NAME() NOT IN (''master'',''msdb'',''tempdb'', ''model'', ''ReportServer'')'+ IIF (@dbSearchPattern IS NOT NULL, ' AND (DB_NAME() LIKE '''+@dbSearchPattern+''')','')+'
-BEGIN
 
-	DECLARE @schemaName nvarchar(200),@tableName nvarchar(200), @columnName nvarchar(200), @fullTableName nvarchar(1000), @sql nvarchar(4000)
+DECLARE @dbName nvarchar(200), @schemaName nvarchar(200),@tableName nvarchar(200), @columnName nvarchar(200), @columnType nvarchar(200), @fullTableName nvarchar(1000), @sql nvarchar(4000), @selectSql nvarchar(4000)
 
-	PRINT ''Checking database ?''
+PRINT N''Checking database [?]''
 
-	DECLARE [tables] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
-
-	SELECT s.[name] AS SchemaName,t.[name] AS TableName,c.[name] AS ColumnName,''[''+s.[name]+''].[''+t.[name]+'']'' AS FullName
-	FROM sys.tables t
-	INNER JOIN sys.schemas s ON t.schema_id=s.schema_id'+
-  CHAR(10)+CHAR(9)+IIF(@columnSearchPattern IS NOT NULL,'INNER','LEFT')+' JOIN sys.columns c ON c.[name] LIKE '''+COALESCE(@columnSearchPattern,'')+''' AND c.[object_id]=t.[object_id]'
-  +IIF(@tableSearchPattern IS NOT NULL, CHAR(10)+CHAR(9)+'WHERE t.[name] LIKE '''+@tableSearchPattern+'''','')+
+DECLARE [tables] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
+SELECT N''[''+ DB_NAME() +N'']'' AS DatabaseName,N''[''+ s.[name] +N'']'' AS SchemaName,N''[''+ t.[name] +N'']'' AS TableName,IIF(c.[name] IS NOT NULL,N''[''+ c.[name] +N'']'',NULL) AS ColumnName,tp.[Name] AS ColumnType, N''[''+DB_NAME()+N''].[''+s.[name]+N''].[''+t.[name]+N'']'' AS FullTableName
+FROM sys.tables t
+INNER JOIN sys.schemas s ON t.schema_id=s.schema_id'+
++CHAR(10)+IIF(@columnSearchPattern IS NOT NULL,'INNER','LEFT')+' JOIN sys.columns c ON c.[name] LIKE '''+COALESCE(@columnSearchPattern,'')+''' AND c.[object_id]=t.[object_id]'
++CHAR(10)+'LEFT JOIN sys.types tp ON tp.user_type_id = c.user_type_id'
++IIF(@tableSearchPattern IS NOT NULL, CHAR(10)+'WHERE t.[name] LIKE '''+@tableSearchPattern+'''','')+
 '
 
-	OPEN [tables]
+OPEN [tables]
 
-	FETCH NEXT FROM [tables] INTO @schemaName, @tableName, @columnName, @fullTableName
+FETCH NEXT FROM [tables] INTO @dbName, @schemaName, @tableName, @columnName, @columnType, @fullTableName
 
-	WHILE @@FETCH_STATUS = 0
+WHILE @@FETCH_STATUS = 0
 
+BEGIN
+	IF(@columnName IS NOT NULL AND @innerValuePattern IS NOT NULL)
 	BEGIN
+		SET @selectSql=N''SELECT [??] FROM ''+@fullTableName+N'' WHERE ''+(CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' ELSE @columnName END)+N'' LIKE ''''''+@innerValuePattern+N'''''''' 
+		SET @sql=N''IF EXISTS (''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''1'')+N'')'' 
+	END
+	ELSE
+	BEGIN
+		SET @selectSql = NULL
+		SET @sql=N''''
+	END
 
-'+
-IIF(@columnSearchPattern IS NOT NULL AND @valuePattern IS NOT NULL,
-    CHAR(9)+CHAR(9)+'SET @sql=''IF EXISTS (SELECT 1 FROM ''+@fullTableName+'' WHERE [''+ @columnName+''] LIKE '''''+@valuePattern+''''') ',
-    CHAR(9)+CHAR(9)+'SET @sql=''')
-+'INSERT INTO #Output SELECT DB_NAME(),''''''+@schemaName+'''''',''''''+@tableName+'''''',@innerColumnName,''''[''+DB_NAME()+''].''+@fullTableName+IIF(@columnName IS NOT NULL,''.[''+@columnName+'']'''''','''''''')
+	SET @sql = @sql+N'' INSERT INTO #Output SELECT ''''''+@dbName+N'''''',''''''+@schemaName+N'''''',''''''+@tableName+N'''''',''''''+COALESCE(@columnName,N'''')+N'''''',''''''+@fullTableName+N'''''',''''''+REPLACE(REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''*''),'''''''','''''''''''')+N''''''''
 
-		PRINT @sql
+	PRINT @sql
 
-		EXECUTE sp_executesql @sql, N''@innerColumnName nvarchar(100)'',@innerColumnName=@columnName
+	EXECUTE sp_executesql @sql
 
-		FETCH NEXT FROM [tables] INTO @schemaName, @tableName, @columnName, @fullTableName
-
-  END
-
-  CLOSE [tables]; 
-  DEALLOCATE [tables];
+	FETCH NEXT FROM [tables] INTO @dbName, @schemaName, @tableName, @columnName, @columnType, @fullTableName
 
 END
+
+CLOSE [tables]; 
+DEALLOCATE [tables];
 
 '
 
 PRINT @statement
 
-EXEC sp_MSforeachdb @statement
+DECLARE [databases] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
+SELECT [name]
+FROM sys.databases
+
+OPEN [databases]
+FETCH NEXT FROM [databases] INTO @outerDbName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	IF (@outerDbName NOT IN ('master','msdb','tempdb', 'model', 'ReportServer') AND (@dbSearchPattern IS NULL OR @outerDbName LIKE @dbSearchPattern))
+	BEGIN
+		DECLARE @statementForDatabase NVARCHAR(MAX) = REPLACE(@statement,N'[?]',@outerDbName)
+		EXECUTE sp_executesql @statementForDatabase,N'@innerValuePattern nvarchar(1000)',@innerValuePattern = @valuePattern
+	END
+	FETCH NEXT FROM [databases] INTO @outerDbName
+END
+
+CLOSE [databases]; 
+DEALLOCATE [databases];
 
 SELECT * FROM #Output
 
