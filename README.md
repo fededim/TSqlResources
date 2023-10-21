@@ -4,13 +4,13 @@ A set of resources for Sql Server
 
 # Stored Procedures (SPs folder)
 
-##spSearchTables.sql
+## spSearchTables.sql
 
 A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server
 
 # Functions (Functions folder)
 
-##fnGetCalendarTable.sql
+## fnGetCalendarTable.sql
 
 A helper table valued function which returns a range of dates from a startDate to an endDate using the stepMin step in minutes
 
