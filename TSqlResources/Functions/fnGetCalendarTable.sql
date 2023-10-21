@@ -1,4 +1,19 @@
-﻿-- © 2020 Federico Di Marco <fededim@gmail.com>
+﻿/*********************************************************************************************
+© 2016	Federico Di Marco <fededim@gmail.com>
+fnGetCalendarTable - A helper table valued function which returns a range of dates from a startDate to an endDate using the stepMin step in minutes
+
+PARAMETERS:
+	- @startDate: the date from which the calendar table should start
+	- @endDate: the date to which the calendar table should stop
+	- @stepMin: the increment step in minutes
+ 
+OUTPUT:
+	- A calendar table
+
+VERSION HISTORY:
+  20161001	fededim		Initial Release
+ 
+*********************************************************************************************/
 
 CREATE OR ALTER FUNCTION fnGetCalendarTable
 (@startDate datetime2,

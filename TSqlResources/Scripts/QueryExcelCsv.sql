@@ -1,6 +1,19 @@
-﻿-- © 2020 Federico Di Marco <fededim@gmail.com> (initially implemented in 2008 with older version Microsoft Access Database Engine)
+﻿/*********************************************************************************************
+© 2020	Federico Di Marco <fededim@gmail.com> (initially implemented in 2008 with older version Microsoft Access Database Engine)
+QueryExcelCsv - An example script which can be used to query CSV or XSLX files directly in Sql Management Studio without importing them into tables
 
--- BEGIN of only once setup
+PARAMETERS:
+	- None
+ 
+OUTPUT:
+	- None
+
+VERSION HISTORY:
+  20161001	fededim		Initial Release
+ 
+*********************************************************************************************/
+
+-- SETUP: do only ONCE per server
 
 -- Enable ad hoc queries on server
 sp_configure 'show advanced options',1
@@ -11,16 +24,16 @@ reconfigure
 
 --Install Microsoft Access Database Engine 2016 Redistributable on server https://www.microsoft.com/en-us/download/details.aspx?id=54920
 
--- Launch on Sql Server
+-- Enable InProcess and DynamicParameters
 USE [master]
 GO
 EXEC master.dbo.sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.16.0', N'AllowInProcess', 1
 GO
 EXEC master.dbo.sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.16.0', N'DynamicParameters', 1 
 
--- restart Sql Server
+-- Restart Sql Server
 
--- END of only once setup
+-- SETUP: END of only once setup
 
 
 

@@ -1,4 +1,20 @@
-﻿-- © 2023 Federico Di Marco <fededim@gmail.com>
+﻿/*********************************************************************************************
+© 2023	Federico Di Marco <fededim@gmail.com>
+spSearchTables - A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server
+
+PARAMETERS:
+	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases
+	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables
+	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns
+	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
+ 
+OUTPUT:
+	- A result table
+
+VERSION HISTORY:
+  20231021	fededim		Initial Release
+ 
+*********************************************************************************************/
 
 CREATE OR ALTER PROCEDURE spSearchTables
 (@dbSearchPattern nvarchar(256)=NULL, 
@@ -49,7 +65,7 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	IF(@columnName IS NOT NULL AND @innerValuePattern IS NOT NULL)
 	BEGIN
-		SET @selectSql=N''SELECT [??] FROM ''+@fullTableName+N'' WHERE ''+(CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' ELSE @columnName END)+N'' LIKE ''''''+@innerValuePattern+N'''''''' 
+		SET @selectSql=N''SELECT [??] FROM ''+@fullTableName+N'' WHERE ''+(CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''datetime'',N''datetime2'',N''datetimeoffset'',N''time'') THEN N''CONVERT(nvarchar(50),''+@columnName+N'',126)'' ELSE @columnName END)+N'' LIKE ''''''+@innerValuePattern+N'''''''' 
 		SET @sql=N''IF EXISTS (''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''1'')+N'')'' 
 	END
 	ELSE

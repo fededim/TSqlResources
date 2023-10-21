@@ -65,5 +65,6 @@
     <Build Include="Functions\fnGetCalendarTable.sql" />
     <Build Include="Scripts\DbMaintenance.sql" />
     <Build Include="Scripts\QueryExcelCsv.sql" />
+    <Build Include="Scripts\BackupDatabase.sql" />
   </ItemGroup>
 </Project>

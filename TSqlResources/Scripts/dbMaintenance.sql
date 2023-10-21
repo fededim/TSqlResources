@@ -1,4 +1,17 @@
--- © 2020 Federico Di Marco <fededim@gmail.com>
+/*********************************************************************************************
+© 2016	Federico Di Marco <fededim@gmail.com>
+DbMaintenance - A helper script which must be scheduled every day (or more frequently) to rebuild all fragmented indexes of a database and update all its statistics
+
+PARAMETERS:
+	- None
+ 
+OUTPUT:
+	- None
+
+VERSION HISTORY:
+  20161001	fededim		Initial Release
+ 
+*********************************************************************************************/
 
 DECLARE @statement NVARCHAR(4000) -- statement 
 
