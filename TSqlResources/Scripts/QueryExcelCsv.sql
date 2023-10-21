@@ -21,7 +21,8 @@ reconfigure
 GO
 sp_configure 'Ad Hoc Distributed Queries',1
 reconfigure
-
+GO
+	
 --Install Microsoft Access Database Engine 2016 Redistributable on server https://www.microsoft.com/en-us/download/details.aspx?id=54920
 
 -- Enable InProcess and DynamicParameters
@@ -30,7 +31,8 @@ GO
 EXEC master.dbo.sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.16.0', N'AllowInProcess', 1
 GO
 EXEC master.dbo.sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.16.0', N'DynamicParameters', 1 
-
+GO
+	
 -- Restart Sql Server
 
 -- SETUP: END of only once setup
@@ -40,8 +42,8 @@ EXEC master.dbo.sp_MSset_oledb_prop N'Microsoft.ACE.OLEDB.16.0', N'DynamicParame
 -- FOR either CSV or XLSX you have to copy the file on server, ensure that the user of Sql Server service has read access to both folder and file
 
 
--- FOR CSV (comma separated), set HDR parameter to YES only if header is present, 
-SELECT * FROM OPENROWSET('Microsoft.ACE.OLEDB.16.0','Text;Database=<only directories to file.csv>;HDR=YES','SELECT * FROM <file.csv>')
+-- FOR CSV (comma separated), you can set the HDR parameter to YES if first row of CSV file contains the column names.
+SELECT * FROM OPENROWSET('Microsoft.ACE.OLEDB.16.0','Text;Database=<path to file.csv>;HDR=YES','SELECT * FROM <file.csv>')
 
 
 -- FOR CSV (different separator than comma)
