@@ -56,8 +56,14 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="SPS\" />
+    <Folder Include="Functions\" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="SearchTables.sql" />
+    <Build Include="SPs\spSearchTables.sql" />
+    <Build Include="Functions\fnGetCalendarTable.sql" />
+    <Build Include="Scripts\DbMaintenance.sql" />
+    <Build Include="Scripts\ExcelCsvToTable.sql" />
   </ItemGroup>
 </Project>

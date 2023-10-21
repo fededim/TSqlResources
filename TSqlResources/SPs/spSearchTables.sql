@@ -1,4 +1,6 @@
-﻿CREATE OR ALTER PROCEDURE searchTables
+﻿-- © 2023 Federico Di Marco <fededim@gmail.com>
+
+CREATE OR ALTER PROCEDURE spSearchTables
 (@dbSearchPattern nvarchar(256)=NULL, 
  @tableSearchPattern nvarchar(256),
  @columnSearchPattern nvarchar(256)=NULL,
