@@ -64,6 +64,6 @@
     <Build Include="SPs\spSearchTables.sql" />
     <Build Include="Functions\fnGetCalendarTable.sql" />
     <Build Include="Scripts\DbMaintenance.sql" />
-    <Build Include="Scripts\ExcelCsvToTable.sql" />
+    <Build Include="Scripts\QueryExcelCsv.sql" />
   </ItemGroup>
 </Project>
