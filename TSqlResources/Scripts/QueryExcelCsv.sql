@@ -39,7 +39,7 @@ GO
 
 
 
--- FOR either CSV or XLSX you have to copy the file on server, ensure that the user of Sql Server service has read access to both folder and file
+-- FOR either CSV or Excel you have to copy the file on server, ensure that the user of Sql Server service has read access to both folder and file
 
 
 -- FOR CSV (comma separated), you can set the HDR parameter to YES if first row of CSV file contains the column names.
