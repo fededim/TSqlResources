@@ -55,5 +55,5 @@ SELECT * FROM OPENROWSET('Microsoft.ACE.OLEDB.16.0','Text;Database=<path to file
 SELECT * FROM OPENROWSET('Microsoft.ACE.OLEDB.16.0','Text;Database=<only directories to file.csv>;HDR=YES','SELECT * FROM <file.csv>')
 
 
--- FOR XLSX
+-- FOR XLSX or XLS
 SELECT * FROM OPENROWSET('Microsoft.ACE.OLEDB.16.0','Excel 12.0; Database=<full path to excel.xlsx>', [<sheet name>$])
