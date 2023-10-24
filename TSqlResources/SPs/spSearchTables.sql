@@ -13,6 +13,7 @@ OUTPUT:
 
 VERSION HISTORY:
   20231021	fededim		Initial Release
+  20231025	fededim		improved check for values now it uses just a single query for each table / flattened matching columns in a comma separated list / added MatchingColumns as first ones in the MatchingSelect query
  
 *********************************************************************************************/
 
@@ -32,18 +33,20 @@ CREATE TABLE #Output
  [Database] nvarchar(100),
  [Schema] nvarchar(100),
  [Table] nvarchar(100),
- [Column] nvarchar(100),
  [FullTableName] nvarchar(300),
- [FullSelect] nvarchar(300),
+ [MatchingColumns] nvarchar(100),
+ [MatchingSelect] nvarchar(max),
 )
 
 DECLARE @outerDbName nvarchar(100)
 
-DECLARE @statement NVARCHAR(MAX) = N'
+DECLARE @statement NVARCHAR(max) = CAST('' as NVARCHAR(MAX))+N'
 USE [?]
 
 
-DECLARE @dbName nvarchar(200), @schemaName nvarchar(200),@tableName nvarchar(200), @columnName nvarchar(200), @columnType nvarchar(200), @fullTableName nvarchar(1000), @sql nvarchar(4000), @selectSql nvarchar(4000)
+DECLARE @dbName nvarchar(200), @schemaName nvarchar(200),@tableName nvarchar(200), @columnName nvarchar(200), @columnType nvarchar(200), @fullTableName nvarchar(1000)  -- current data
+DECLARE @oldDbName nvarchar(200), @oldSchemaName nvarchar(200),@oldTableName nvarchar(200), @oldFullTableName nvarchar(1000)  -- old data
+DECLARE @whereColumnName nvarchar(200), @whereCondition nvarchar(400), @whereClause nvarchar(max), @sql nvarchar(max), @selectSql nvarchar(max), @columnListSelect nvarchar(max)  -- helper variables
 
 PRINT N''Checking database [?]''
 
@@ -51,45 +54,93 @@ DECLARE [tables] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
 SELECT N''[''+ DB_NAME() +N'']'' AS DatabaseName,N''[''+ s.[name] +N'']'' AS SchemaName,N''[''+ t.[name] +N'']'' AS TableName,IIF(c.[name] IS NOT NULL,N''[''+ c.[name] +N'']'',NULL) AS ColumnName,tp.[Name] AS ColumnType, N''[''+DB_NAME()+N''].[''+s.[name]+N''].[''+t.[name]+N'']'' AS FullTableName
 FROM sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id=s.schema_id'+
-+CHAR(10)+IIF(@columnSearchPattern IS NOT NULL,'INNER','LEFT')+' JOIN sys.columns c ON c.[name] LIKE '''+COALESCE(@columnSearchPattern,'')+''' AND c.[object_id]=t.[object_id]'
-+CHAR(10)+'LEFT JOIN sys.types tp ON tp.user_type_id = c.user_type_id'
-+IIF(@tableSearchPattern IS NOT NULL, CHAR(10)+'WHERE t.[name] LIKE '''+@tableSearchPattern+'''','')+
-'
++CHAR(10)+IIF(@columnSearchPattern IS NOT NULL,N'INNER',N'LEFT')+N' JOIN sys.columns c ON c.[name] LIKE '''+COALESCE(@columnSearchPattern,'')+N''' AND c.[object_id]=t.[object_id]'
++CHAR(10)+N'LEFT JOIN sys.types tp ON tp.user_type_id = c.user_type_id'
++IIF(@tableSearchPattern IS NOT NULL, CHAR(10)+'WHERE t.[name] LIKE '''+@tableSearchPattern+'''','')
++CHAR(10)+N'ORDER BY FullTableName
+
+SET @oldFullTableName = NULL
 
 OPEN [tables]
 
 FETCH NEXT FROM [tables] INTO @dbName, @schemaName, @tableName, @columnName, @columnType, @fullTableName
-
-WHILE @@FETCH_STATUS = 0
-
+WHILE (1=1)
 BEGIN
+	IF ((@oldFullTableName<>@fullTableName AND @oldFullTableName IS NOT NULL) OR @@FETCH_STATUS<>0)
+	BEGIN
+		IF (@whereClause IS NOT NULL)
+		BEGIN
+			SET @whereClause = REPLACE(CONCAT(@whereClause,N''[???]'') COLLATE Latin1_General_CI_AS,N''OR [???]'',N'''')  --trim last "OR "
+			SET @selectSql = N''SELECT [??] FROM ''+@oldFullTableName+N'' WHERE '' + @whereClause 
+		END
+		ELSE
+			SET @selectSql = NULL
+
+		IF (@columnListSelect IS NOT NULL)
+		BEGIN
+			SET @columnListSelect = N''REPLACE(CONCAT(''+@columnListSelect + N''''''[???]'''') COLLATE Latin1_General_CI_AS,N'''',[???]'''',N'''''''')''  -- trim last ","
+			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',''+COALESCE(@columnListSelect,N'''')+N'',''''''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,'''''''','''''''''''')+N'''''' FROM ''+@oldFullTableName+'' WHERE ''+@whereClause
+		END
+		ELSE IF (@oldDbName IS NOT NULL)
+			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',NULL,NULL''
+
+		IF (@selectSql IS NOT NULL)
+			SET @sql = N''IF EXISTS (''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''1'')+N'')'' +@sql
+
+		IF (@sql IS NOT NULL)
+		BEGIN
+			PRINT @sql
+
+			EXECUTE sp_executesql @sql
+		END
+
+		IF (@@FETCH_STATUS<>0)
+			BREAK
+
+		SET @whereClause = NULL
+		SET @columnListSelect = NULL
+	END
+
 	IF(@columnName IS NOT NULL AND @innerValuePattern IS NOT NULL)
 	BEGIN
-		SET @selectSql=N''SELECT [??] FROM ''+@fullTableName+N'' WHERE ''+(CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''datetime'',N''datetime2'',N''datetimeoffset'',N''time'') THEN N''CONVERT(nvarchar(50),''+@columnName+N'',126)'' ELSE @columnName END)+N'' LIKE ''''''+@innerValuePattern+N'''''''' 
-		SET @sql=N''IF EXISTS (''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''1'')+N'')'' 
+		SET @whereColumnName = (CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''datetime'',N''datetime2'',N''datetimeoffset'',N''time'') THEN N''CONVERT(nvarchar(50),''+@columnName+N'',126)'' ELSE @columnName END)
+		SET @whereCondition = N''('' + @whereColumnName+N'' LIKE ''''''+@innerValuePattern+N'''''')''
+
+		SET @whereClause = @whereClause + @whereCondition + N'' OR ''
+
+		SET @columnListSelect= @columnListSelect + N''IIF(SUM(CASE WHEN ''+@whereCondition+'' THEN 1 ELSE 0 END)>0,''''''+@columnName+'','''',NULL),''
 	END
 	ELSE
 	BEGIN
-		SET @selectSql = NULL
-		SET @sql=N''''
+		SET @whereClause = NULL
+		SET @columnListSelect = NULL
 	END
 
-	SET @sql = @sql+N'' INSERT INTO #Output SELECT ''''''+@dbName+N'''''',''''''+@schemaName+N'''''',''''''+@tableName+N'''''',''''''+COALESCE(@columnName,N'''')+N'''''',''''''+@fullTableName+N'''''',''''''+REPLACE(REPLACE(@selectSql COLLATE Latin1_General_CI_AS,''[??]'',''*''),'''''''','''''''''''')+N''''''''
-
-	PRINT @sql
-
-	EXECUTE sp_executesql @sql
+	SET @oldDbName = @dbName
+	SET @oldSchemaName = @schemaName
+	SET @oldTableName = @tableName
+	SET @oldFullTableName = @fullTableName
 
 	FETCH NEXT FROM [tables] INTO @dbName, @schemaName, @tableName, @columnName, @columnType, @fullTableName
-
-END
+END	
 
 CLOSE [tables]; 
 DEALLOCATE [tables];
 
 '
 
-PRINT @statement
+
+DECLARE @offsetToPrint bigint = 0
+
+WHILE (@offsetToPrint<len(@statement))
+BEGIN
+	PRINT substring(@statement,@offsetToPrint, CASE WHEN len(@statement)-@offsetToPrint < 4000 THEN len(@statement)-@offsetToPrint ELSE 4000 END) -- it gets truncated to 4000 characters
+	SET @offsetToPrint = @offsetToPrint + 4000
+END
+
+
+--SELECT CAST('<root><![CDATA[' + @statement + ']]></root>' AS XML) -- use this to show complete statement for debugging
+
 
 DECLARE [databases] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
 SELECT [name]
@@ -110,6 +161,9 @@ END
 
 CLOSE [databases]; 
 DEALLOCATE [databases];
+
+UPDATE #Output
+SET [MatchingSelect]=REPLACE([MatchingSelect],'[??]',[MatchingColumns]+',*')
 
 SELECT * FROM #Output
 
