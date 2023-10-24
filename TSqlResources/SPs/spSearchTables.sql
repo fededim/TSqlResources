@@ -102,7 +102,7 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	IF (@outerDbName NOT IN ('master','msdb','tempdb', 'model', 'ReportServer') AND (@dbSearchPattern IS NULL OR @outerDbName LIKE @dbSearchPattern))
 	BEGIN
-		DECLARE @statementForDatabase NVARCHAR(MAX) = REPLACE(@statement,N'[?]',@outerDbName)
+		DECLARE @statementForDatabase NVARCHAR(MAX) = REPLACE(@statement,N'[?]','['+@outerDbName+']')
 		EXECUTE sp_executesql @statementForDatabase,N'@innerValuePattern nvarchar(1000)',@innerValuePattern = @valuePattern
 	END
 	FETCH NEXT FROM [databases] INTO @outerDbName
