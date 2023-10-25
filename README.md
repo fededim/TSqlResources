@@ -20,7 +20,7 @@ A helper table valued function which returns a range of dates from a startDate t
 A helper script which must be scheduled every day (or more frequently) to rebuild all fragmented indexes of a database and update all its statistics
 
 ## QueryExcelCsv.sql
-An example script which can be used to query CSV or XSLX files directly in Sql Management Studio without importing them into tables
+An example script which can be used to query CSV or XSLX files directly in Sql Management Studio without importing them into tables. [Link to CodeProject article.](https://www.codeproject.com/Tips/5370433/Query-Excel-or-CSV-files-with-T-SQL)
 
 ## BackupDatabase.Sql
 A helper script which will perform a backup of a database to a network location mounted on letter Z:
