@@ -4,7 +4,7 @@ A set of resources for Sql Server
 
 # Stored Procedures (SPs folder)
 
-## spSearchTables.sql
+## [spSearchTables.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/SPs/spSearchTables.sql)
 
 A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server
 
