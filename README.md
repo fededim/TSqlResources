@@ -8,6 +8,34 @@ A set of resources for Sql Server
 
 A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server
 
+### Usage
+
+exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern, @valuePattern
+
+PARAMETERS:
+	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases
+	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables
+	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns
+	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
+ 
+OUTPUT:
+A table with these columns:
+  - [Database]: database names matching @dbSearchPattern parameter
+  - [Schema]: schema names matching @tableSearchPattern parameter
+  - [Table]: table names  matching @columnSearchPattern parameter
+  - [FullTableName]: it's just the concatenation of database + schema + table
+  - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
+  - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
+
+### Sample searches
+
+exec spSearchTables NULL,NULL,NULL,NULL - returns all tables with all columns in all databases in the server
+exec spSearchTables 'North%',NULL,NULL,NULL - returns all tables with all columns in all databases starting with North% in the server
+exec spSearchTables 'North%','S%',NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server
+exec spSearchTables 'North%','S%','P%',NULL - returns tables starting with S% with columns starting with P% in databases starting with North% in the server 
+exec spSearchTables 'North%','S%','P%','30%' - returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
+exec spSearchTables NULL,NULL,NULL,'30%' - returns all table and all columns whose value matches 30% in all databases in the server
+
 # Functions (Functions folder)
 
 ## fnGetCalendarTable.sql
