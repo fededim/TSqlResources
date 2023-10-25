@@ -9,7 +9,13 @@ PARAMETERS:
 	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
  
 OUTPUT:
-	- A result table
+A table with these columns:
+  - [Database]: database names matching @dbSearchPattern parameter
+  - [Schema]: schema names matching @tableSearchPattern parameter
+  - [Table]: table names  matching @columnSearchPattern parameter
+  - [FullTableName]: it's just the concatenation of database + schema + table
+  - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
+  - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
 
 VERSION HISTORY:
   20231021	fededim		Initial Release
