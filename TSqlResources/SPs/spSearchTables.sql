@@ -66,7 +66,7 @@ DECLARE @whereColumnName nvarchar(200), @whereCondition nvarchar(400), @whereCla
 PRINT N''Checking database [?]''
 
 DECLARE [tables] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
-SELECT N''[''+ DB_NAME() +N'']'' AS DatabaseName,N''[''+ s.[name] +N'']'' AS SchemaName,N''[''+ t.[name] +N'']'' AS TableName,IIF(c.[name] IS NOT NULL,N''[''+ c.[name] +N'']'',NULL) AS ColumnName,tp.[Name] AS ColumnType, N''[''+DB_NAME()+N''].[''+s.[name]+N''].[''+t.[name]+N'']'' AS FullTableName
+SELECT N''[''+ DB_NAME() +N'']'' AS DatabaseName,N''[''+ s.[name] +N'']'' AS SchemaName,N''[''+ t.[name] +N'']'' AS TableName,N''[''+ c.[name] +N'']'' AS ColumnName,tp.[Name] AS ColumnType, N''[''+DB_NAME()+N''].[''+s.[name]+N''].[''+t.[name]+N'']'' AS FullTableName
 FROM sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id=s.schema_id
 INNER JOIN sys.columns c ON (@innerColumnSearchPattern IS NULL OR c.[name] LIKE @innerColumnSearchPattern) AND c.[object_id]=t.[object_id]
