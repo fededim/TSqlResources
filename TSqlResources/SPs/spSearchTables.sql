@@ -14,6 +14,7 @@ OUTPUT:
 VERSION HISTORY:
   20231021	fededim		Initial Release
   20231025	fededim		improved check for values now it uses just a single query for each table / flattened matching columns in a comma separated list / added MatchingColumns as first ones in the MatchingSelect query
+  20231025	fededim		improved handling of @columnSearchPattern parameter, now you can use it without specifying @valuePattern parameter
  
 *********************************************************************************************/
 
@@ -34,7 +35,7 @@ CREATE TABLE #Output
  [Schema] nvarchar(100),
  [Table] nvarchar(100),
  [FullTableName] nvarchar(300),
- [MatchingColumns] nvarchar(100),
+ [MatchingColumns] nvarchar(max),
  [MatchingSelect] nvarchar(max),
 )
 
@@ -53,9 +54,9 @@ PRINT N''Checking database [?]''
 DECLARE [tables] CURSOR LOCAL READ_ONLY FORWARD_ONLY FOR
 SELECT N''[''+ DB_NAME() +N'']'' AS DatabaseName,N''[''+ s.[name] +N'']'' AS SchemaName,N''[''+ t.[name] +N'']'' AS TableName,IIF(c.[name] IS NOT NULL,N''[''+ c.[name] +N'']'',NULL) AS ColumnName,tp.[Name] AS ColumnType, N''[''+DB_NAME()+N''].[''+s.[name]+N''].[''+t.[name]+N'']'' AS FullTableName
 FROM sys.tables t
-INNER JOIN sys.schemas s ON t.schema_id=s.schema_id'+
-+CHAR(10)+IIF(@columnSearchPattern IS NOT NULL,N'INNER',N'LEFT')+N' JOIN sys.columns c ON c.[name] LIKE '''+COALESCE(@columnSearchPattern,'')+N''' AND c.[object_id]=t.[object_id]'
-+CHAR(10)+N'LEFT JOIN sys.types tp ON tp.user_type_id = c.user_type_id'
+INNER JOIN sys.schemas s ON t.schema_id=s.schema_id
+INNER JOIN sys.columns c ON (@innerColumnSearchPattern IS NULL OR c.[name] LIKE @innerColumnSearchPattern) AND c.[object_id]=t.[object_id]
+INNER JOIN sys.types tp ON tp.user_type_id = c.user_type_id'
 +IIF(@tableSearchPattern IS NOT NULL, CHAR(10)+'WHERE t.[name] LIKE '''+@tableSearchPattern+'''','')
 +CHAR(10)+N'ORDER BY FullTableName
 
@@ -79,7 +80,7 @@ BEGIN
 		IF (@columnListSelect IS NOT NULL)
 		BEGIN
 			SET @columnListSelect = N''REPLACE(CONCAT(''+@columnListSelect + N''''''[???]'''') COLLATE Latin1_General_CI_AS,N'''',[???]'''',N'''''''')''  -- trim last ","
-			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',''+COALESCE(@columnListSelect,N'''')+N'',''''''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,'''''''','''''''''''')+N'''''' FROM ''+@oldFullTableName+'' WHERE ''+@whereClause
+			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',''+@columnListSelect+N'',''''''+REPLACE(@selectSql COLLATE Latin1_General_CI_AS,'''''''','''''''''''')+N''''''''+IIF(@whereClause IS NOT NULL,'' FROM ''+@oldFullTableName+'' WHERE ''+@whereClause,'''')
 		END
 		ELSE IF (@oldDbName IS NOT NULL)
 			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',NULL,NULL''
@@ -101,7 +102,7 @@ BEGIN
 		SET @columnListSelect = NULL
 	END
 
-	IF(@columnName IS NOT NULL AND @innerValuePattern IS NOT NULL)
+	IF (@innerValuePattern IS NOT NULL)
 	BEGIN
 		SET @whereColumnName = (CASE WHEN @columnType COLLATE Latin1_General_CI_AS = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE Latin1_General_CI_AS = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''hierarchyid'',N''geography'') THEN @columnName+N''.ToString()'' WHEN @columnType COLLATE Latin1_General_CI_AS IN (N''datetime'',N''datetime2'',N''datetimeoffset'',N''time'') THEN N''CONVERT(nvarchar(50),''+@columnName+N'',126)'' ELSE @columnName END)
 		SET @whereCondition = N''('' + @whereColumnName+N'' LIKE ''''''+@innerValuePattern+N'''''')''
@@ -113,7 +114,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SET @whereClause = NULL
-		SET @columnListSelect = NULL
+		SET @columnListSelect= @columnListSelect + N''MAX('''''' + @columnName + N'',''''),''
 	END
 
 	SET @oldDbName = @dbName
@@ -154,7 +155,7 @@ BEGIN
 	IF (@outerDbName NOT IN ('master','msdb','tempdb', 'model', 'ReportServer') AND (@dbSearchPattern IS NULL OR @outerDbName LIKE @dbSearchPattern))
 	BEGIN
 		DECLARE @statementForDatabase NVARCHAR(MAX) = REPLACE(@statement,N'[?]','['+@outerDbName+']')
-		EXECUTE sp_executesql @statementForDatabase,N'@innerValuePattern nvarchar(1000)',@innerValuePattern = @valuePattern
+		EXECUTE sp_executesql @statementForDatabase,N'@innerValuePattern nvarchar(1000), @innerColumnSearchPattern nvarchar(256)',@innerValuePattern = @valuePattern, @innerColumnSearchPattern = @columnSearchPattern
 	END
 	FETCH NEXT FROM [databases] INTO @outerDbName
 END
