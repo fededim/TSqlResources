@@ -17,6 +17,14 @@ A table with these columns:
   - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
   - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
 
+SAMPLE SEARCHES:
+exec spSearchTables NULL,NULL,NULL,NULL - returns all tables with all columns in all databases in the server
+exec spSearchTables 'North%',NULL,NULL,NULL - returns all tables with all columns in all databases starting with North% in the server
+exec spSearchTables 'North%','S%',NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server
+exec spSearchTables 'North%','S%','P%',NULL - returns tables starting with S% with columns starting with P% in databases starting with North% in the server 
+exec spSearchTables 'North%','S%','P%','30%' - returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
+exec spSearchTables NULL,NULL,NULL,'30%' - returns all table and all columns whose value matches 30% in all databases in the server
+
 VERSION HISTORY:
   20231021	fededim		Initial Release
   20231025	fededim		improved check for values now it uses just a single query for each table / flattened matching columns in a comma separated list / added MatchingColumns as first ones in the MatchingSelect query
