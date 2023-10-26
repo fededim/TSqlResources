@@ -30,12 +30,12 @@ A table with these columns:
 
 ### USAGE
 
-exec spSearchTables NULL,NULL,NULL,NULL --> returns all tables with all columns in all databases in the server <BR />
-exec spSearchTables 'North%',NULL,NULL,NULL --> returns all tables with all columns in all databases starting with North% in the server <BR />
-exec spSearchTables 'North%','S%',NULL,NULL --> returns tables starting with S% with all columns in databases starting with North% in the server <BR />
-exec spSearchTables 'North%','S%','P%',NULL --> returns tables starting with S% with columns starting with P% in databases starting with North% in the server <BR />
-exec spSearchTables 'North%','S%','P%','30%' --> returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server <BR />
-exec spSearchTables NULL,NULL,NULL,'30%' --> returns all table and all columns whose value matches 30% in all databases in the server <BR />
+	- exec spSearchTables NULL,NULL,NULL,NULL --> returns all tables with all columns in all databases in the server
+	- exec spSearchTables 'North%',NULL,NULL,NULL --> returns all tables with all columns in all databases starting with North% in the server
+	- exec spSearchTables 'North%','S%',NULL,NULL --> returns tables starting with S% with all columns in databases starting with North% in the server
+	- exec spSearchTables 'North%','S%','P%',NULL --> returns tables starting with S% with columns starting with P% in databases starting with North% in the server
+	- exec spSearchTables 'North%','S%','P%','30%' --> returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
+	- exec spSearchTables NULL,NULL,NULL,'30%' --> returns all table and all columns whose value matches 30% in all databases in the server
 
 # Functions (Functions folder)
 
