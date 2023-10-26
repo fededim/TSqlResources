@@ -38,17 +38,17 @@ exec spSearchTables NULL,NULL,NULL,'30%' --> returns all table and all columns w
 
 # Functions (Functions folder)
 
-## fnGetCalendarTable.sql
+## [fnGetCalendarTable.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/Functions/fnGetCalendarTable.sql)
 
 A helper table valued function which returns a range of dates from a startDate to an endDate using the stepMin step in minutes
 
 # Scripts (Scripts folder)
 
-## DbMaintenance.sql
+## [DbMaintenance.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/Scripts/dbMaintenance.sql)
 A helper script which must be scheduled every day (or more frequently) to rebuild all fragmented indexes of a database and update all its statistics
 
-## QueryExcelCsv.sql
+## [QueryExcelCsv.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/Scripts/QueryExcelCsv.sql)
 An example script which can be used to query CSV or XSLX files directly in Sql Management Studio without importing them into tables. [Link to CodeProject article.](https://www.codeproject.com/Tips/5370433/Query-Excel-or-CSV-files-with-T-SQL)
 
-## BackupDatabase.Sql
+## [BackupDatabase.Sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/Scripts/BackupDatabase.sql)
 A helper script which will perform a backup of a database to a network location mounted on letter Z:
