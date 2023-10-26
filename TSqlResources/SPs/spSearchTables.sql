@@ -17,7 +17,7 @@ A table with these columns:
   - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
   - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
 
-SAMPLE SEARCHES:
+USAGE:
 exec spSearchTables NULL,NULL,NULL,NULL - returns all tables with all columns in all databases in the server
 exec spSearchTables 'North%',NULL,NULL,NULL - returns all tables with all columns in all databases starting with North% in the server
 exec spSearchTables 'North%','S%',NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server
