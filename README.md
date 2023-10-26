@@ -18,7 +18,7 @@ PARAMETERS:
 	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns <BR />
 	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values <BR />
  
-OUTPUT:
+### OUTPUT
 A table with these columns:
   - [Database]: database names matching @dbSearchPattern parameter <BR />
   - [Schema]: schema names matching @tableSearchPattern parameter <BR />
@@ -27,7 +27,7 @@ A table with these columns:
   - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern <BR />
   - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes) <BR />
 
-### Sample searches
+### USAGE
 
 exec spSearchTables NULL,NULL,NULL,NULL --> returns all tables with all columns in all databases in the server <BR />
 exec spSearchTables 'North%',NULL,NULL,NULL --> returns all tables with all columns in all databases starting with North% in the server <BR />
@@ -41,6 +41,18 @@ exec spSearchTables NULL,NULL,NULL,'30%' --> returns all table and all columns w
 ## [fnGetCalendarTable.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/Functions/fnGetCalendarTable.sql)
 
 A helper table valued function which returns a range of dates from a startDate to an endDate using the stepMin step in minutes
+
+### PARAMETERS
+	- @startDate: the date from which the calendar table should start
+	- @endDate: the date to which the calendar table should stop
+	- @stepMin: the increment step in minutes
+ 
+### OUTPUT
+	- A calendar table
+
+### USAGE
+SELECT * FROM fnGetCalendarTable('2020-08-12T08:01:33.123456','2020-08-13T09:15:22',10) OPTION (MAXRECURSION 0)
+
 
 # Scripts (Scripts folder)
 
