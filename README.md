@@ -6,7 +6,7 @@ A set of resources for Sql Server
 
 ## [spSearchTables.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/SPs/spSearchTables.sql)
 
-A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server. [Link to CodeProject article.](https://www.codeproject.com/Tips/5370433/Query-Excel-or-CSV-files-with-T-SQL)
+A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server. [Link to CodeProject article.](https://www.codeproject.com/Articles/5370606/spSearchTables-a-helper-T-SQL-stored-procedure-for)
 
 ### Parameters
 
@@ -52,7 +52,7 @@ A helper table valued function which returns a range of dates from a startDate t
 	- A calendar table
 
 ### USAGE
-SELECT * FROM fnGetCalendarTable('2020-08-12T08:01:33.123456','2020-08-13T09:15:22',10) OPTION (MAXRECURSION 0)
+	- SELECT * FROM fnGetCalendarTable('2020-08-12T08:01:33.123456','2020-08-13T09:15:22',10) OPTION (MAXRECURSION 0)
 
 
 # Scripts (Scripts folder)
