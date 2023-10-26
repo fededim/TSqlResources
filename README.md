@@ -18,7 +18,9 @@ exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern,
 	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
  
 ### OUTPUT
+
 A table with these columns:
+
 	- [Database]: database names matching @dbSearchPattern parameter
 	- [Schema]: schema names matching @tableSearchPattern parameter
 	- [Table]: table names  matching @columnSearchPattern parameter
