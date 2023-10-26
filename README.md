@@ -12,7 +12,6 @@ A helper stored procedure which allows to search tables or columns either by nam
 
 exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern, @valuePattern
 
-PARAMETERS:
 	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases <BR />
 	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables <BR />
 	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns <BR />
