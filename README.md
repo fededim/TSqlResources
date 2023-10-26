@@ -6,25 +6,25 @@ A set of resources for Sql Server
 
 ## [spSearchTables.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/SPs/spSearchTables.sql)
 
-A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server
+A helper stored procedure which allows to search tables or columns either by name or by value in all databases in a server. [Link to CodeProject article.](https://www.codeproject.com/Tips/5370433/Query-Excel-or-CSV-files-with-T-SQL)
 
 ### Parameters
 
 exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern, @valuePattern
 
-	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases <BR />
-	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables <BR />
-	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns <BR />
-	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values <BR />
+	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases
+	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables
+	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns
+	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
  
 ### OUTPUT
 A table with these columns:
-  - [Database]: database names matching @dbSearchPattern parameter <BR />
-  - [Schema]: schema names matching @tableSearchPattern parameter <BR />
-  - [Table]: table names  matching @columnSearchPattern parameter <BR />
-  - [FullTableName]: it's just the concatenation of database + schema + table <BR />
-  - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern <BR />
-  - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes) <BR />
+	- [Database]: database names matching @dbSearchPattern parameter
+	- [Schema]: schema names matching @tableSearchPattern parameter
+	- [Table]: table names  matching @columnSearchPattern parameter
+	- [FullTableName]: it's just the concatenation of database + schema + table
+	- [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
+	- [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
 
 ### USAGE
 
