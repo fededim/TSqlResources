@@ -181,5 +181,6 @@ UPDATE #Output
 SET [MatchingSelect]=REPLACE([MatchingSelect],'[??]',[MatchingColumns]+',*')
 
 SELECT * FROM #Output
-
+ORDER BY [FullTableName]
+	
 END
