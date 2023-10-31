@@ -27,6 +27,7 @@ exec spSearchTables 'North%',NULL,'S%','%int%',NULL,NULL - returns tables starti
 exec spSearchTables 'North%',NULL,'S%',NULL,'P%',NULL - returns tables starting with S% with columns starting with P% in databases starting with North% in the server 
 exec spSearchTables 'North%',,NULL,'S%',NULL,'P%','30%' - returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
 exec spSearchTables NULL,NULL,NULL,NULL,NULL,'30%' - returns all table and all columns whose value matches 30% in all databases in the server
+exec spSearchTables NULL,NULL,NULL,'geo%',NULL,'POINT(-122.35900 47.65129)' - WKT query: returns all table and all columns whose columntype is spatial (e.g. geometry or geography) and contain the specified WKT entity
 
 VERSION HISTORY:
   20231021	fededim		Initial Release

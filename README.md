@@ -15,7 +15,7 @@ exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern,
 	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases
 	- @schemaSearchPattern: a SQL LIKE pattern to filter schemas, set to NULL to search in all schemas
 	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables
-	- @columnTypeSearchPattern: a SQL LIKE pattern to filter column type, set to NULL to search in all column types
+	- @columnTypeSearchPattern: a SQL LIKE pattern to filter column type, set to NULL to search in all column types	
 	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to search in all columns
 	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
  
@@ -39,6 +39,7 @@ A table with these columns:
 	- exec spSearchTables 'North%',NULL,'S%',NULL,'P%',NULL - returns tables starting with S% with columns starting with P% in databases starting with North% in the server 
 	- exec spSearchTables 'North%',,NULL,'S%',NULL,'P%','30%' - returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
 	- exec spSearchTables NULL,NULL,NULL,NULL,NULL,'30%' - returns all table and all columns whose value matches 30% in all databases in the server
+	- exec spSearchTables NULL,NULL,NULL,'geo%',NULL,'POINT(-122.35900 47.65129)' - WKT query: returns all table and all columns whose columntype is spatial (e.g. geometry or geography) and contain the specified WKT entity
 
 # Functions (Functions folder)
 
