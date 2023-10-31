@@ -13,8 +13,10 @@ A helper stored procedure which allows to search tables or columns either by nam
 exec spSearchTables @dbSearchPattern, @tableSearchPattern, @columnSearchPattern, @valuePattern
 
 	- @dbSearchPattern: a SQL LIKE pattern to filter databases, set to NULL to search in all databases
+	- @schemaSearchPattern: a SQL LIKE pattern to filter schemas, set to NULL to search in all schemas
 	- @tableSearchPattern: a SQL LIKE pattern to filter tables, set to  NULL to search in all tables
-	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to peform search only on tables, set to '%' to search also on all columns
+	- @columnTypeSearchPattern: a SQL LIKE pattern to filter column type, set to NULL to search in all column types
+	- @columnSearchPattern: a SQL LIKE pattern to filter columns, set to NULL to search in all columns
 	- @valuePattern: a SQL LIKE pattern to filter column value, set to NULL to not to search on column values
  
 ### OUTPUT
@@ -30,12 +32,13 @@ A table with these columns:
 
 ### USAGE
 
-	- exec spSearchTables NULL,NULL,NULL,NULL --> returns all tables with all columns in all databases in the server
-	- exec spSearchTables 'North%',NULL,NULL,NULL --> returns all tables with all columns in all databases starting with North% in the server
-	- exec spSearchTables 'North%','S%',NULL,NULL --> returns tables starting with S% with all columns in databases starting with North% in the server
-	- exec spSearchTables 'North%','S%','P%',NULL --> returns tables starting with S% with columns starting with P% in databases starting with North% in the server
-	- exec spSearchTables 'North%','S%','P%','30%' --> returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
-	- exec spSearchTables NULL,NULL,NULL,'30%' --> returns all table and all columns whose value matches 30% in all databases in the server
+	- exec spSearchTables NULL,NULL,NULL,NULL,NULL,NULL - returns all tables with all columns in all databases in the server
+	- exec spSearchTables 'North%','d%',NULL,NULL,NULL,NULL - returns all tables with all columns in all databases starting with North% and having d% in the schema in the server
+	- exec spSearchTables 'North%',NULL,'S%',NULL,NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server
+	- exec spSearchTables 'North%',NULL,'S%','%int%',NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server and type %int%
+	- exec spSearchTables 'North%',NULL,'S%',NULL,'P%',NULL - returns tables starting with S% with columns starting with P% in databases starting with North% in the server 
+	- exec spSearchTables 'North%',,NULL,'S%',NULL,'P%','30%' - returns tables starting with S% with columns starting with P% whose value matches 30% in databases starting with North% in the server
+	- exec spSearchTables NULL,NULL,NULL,NULL,NULL,'30%' - returns all table and all columns whose value matches 30% in all databases in the server
 
 # Functions (Functions folder)
 
