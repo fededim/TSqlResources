@@ -148,14 +148,12 @@ BEGIN
 		SET @whereColumnName = (CASE WHEN @columnType COLLATE DATABASE_DEFAULT = N''image'' THEN N''CONVERT(NVARCHAR(MAX),CONVERT(VARBINARY(MAX),''+@columnName+N''),1)'' WHEN @columnType COLLATE DATABASE_DEFAULT = N''xml'' THEN N''CONVERT(nvarchar(MAX),''+@columnName+N'')'' WHEN @columnType COLLATE DATABASE_DEFAULT IN (N''hierarchyid'') THEN @columnName+N''.ToString()'' WHEN @columnType COLLATE DATABASE_DEFAULT IN (N''datetime'',N''datetime2'',N''datetimeoffset'',N''time'') THEN N''CONVERT(nvarchar(50),''+@columnName+N'',126)'' ELSE @columnName END)
 		
 		IF (@columnType COLLATE DATABASE_DEFAULT IN (N''geography'',N''geometry''))
-		BEGIN
-			SET @whereCondition = N''('' + @whereColumnName+N''.ToString() LIKE N''''''+@innerValuePattern+N'''''' COLLATE DATABASE_DEFAULT''
-			
+		BEGIN	
 			IF (@compatibilityLevel>=130 AND ((@columnType COLLATE DATABASE_DEFAULT = N''geometry'' AND @geometry IS NOT NULL)
 				OR (@columnType COLLATE DATABASE_DEFAULT = N''geography'' AND @geography IS NOT NULL)))
-				SET @whereCondition = @whereCondition + N'' OR COALESCE(''+@whereColumnName+N''.STContains(''+IIF(@columnType COLLATE DATABASE_DEFAULT = N''geometry'',N''geometry::Parse(''''''+@geometry.ToString()+N'''''')),0)=1)'',N''geography::Parse(''''''+@geography.ToString()+N'''''')),0)=1)'')
+				SET @whereCondition = N''COALESCE(''+@whereColumnName+N''.STContains(''+IIF(@columnType COLLATE DATABASE_DEFAULT = N''geometry'',N''geometry::Parse(''''''+@geometry.ToString()+N'''''')),0)=1)'',N''geography::Parse(''''''+@geography.ToString()+N'''''')),0)=1'')
 			ELSE
-				SET @whereCondition = @whereCondition + N'')''
+				SET @whereCondition = N''('' + @whereColumnName+N''.ToString() LIKE N''''''+@innerValuePattern+N'''''' COLLATE DATABASE_DEFAULT)''
 
 			SET @whereColumnName = @whereColumnName+N''.ToString()''
 		END
