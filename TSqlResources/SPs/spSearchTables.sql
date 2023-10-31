@@ -123,7 +123,10 @@ BEGIN
 			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',''+@columnList+N'',''+@columnListSelect+N'',''''''+REPLACE(@selectSql COLLATE DATABASE_DEFAULT,'''''''','''''''''''')+N''''''''+IIF(@whereClause IS NOT NULL,'' FROM ''+@oldFullTableName+'' WHERE ''+@whereClause,'''')
 		END
 		ELSE IF (@oldDbName IS NOT NULL)
-			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',NULL,NULL,NULL''
+		BEGIN
+			SET @columnList = N''REPLACE(CONCAT(''+@columnList + N''''''[???]'''') COLLATE DATABASE_DEFAULT,N'''',[???]'''',N'''''''')''  -- trim last ","
+			SET @sql = N'' INSERT INTO #Output SELECT  ''''''+@oldDbName+N'''''',''''''+@oldSchemaName+N'''''',''''''+@oldTableName+N'''''',''''''+@oldFullTableName+N'''''',''+@columnList+N'',NULL,NULL''
+		END
 
 		IF (@selectSql IS NOT NULL)
 			SET @sql = N''IF EXISTS (''+REPLACE(@selectSql COLLATE DATABASE_DEFAULT,''[??]'',''1'')+N'')'' +@sql
@@ -168,7 +171,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SET @whereClause = NULL
-		SET @columnListSelect= @columnListSelect + N''MAX('''''' + @columnName + N'',''''),''
+		SET @columnListSelect = NULL
 		SET @columnList = @columnList + N''MAX('''''' + @columnName + N'',''''),''
 	END
 
@@ -221,7 +224,8 @@ DEALLOCATE [databases];
 UPDATE #Output
 SET [MatchingSelect]=REPLACE([MatchingSelect],'[??]',[MatchingWhereColumns]+',*')
 
-SELECT [Database],[Schema],[Table],[FullTableName],[MatchingColumns],[MatchingSelect] FROM #Output
+SELECT [Database],[Schema],[Table],[FullTableName],[MatchingColumns],[MatchingSelect]
+FROM #Output
 ORDER BY [FullTableName]
 
 END
