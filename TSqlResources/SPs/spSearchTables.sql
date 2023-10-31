@@ -19,7 +19,7 @@ A table with these columns:
   - [MatchingColumns]: comma separated list of column names matching the @columnsSearchPattern
   - [MatchingSelect]: the select statement returning the columns and rows matching the @valuePattern (it supports all column datatypes)
 
-SAMPLE SEARCHES:
+USAGE:
 exec spSearchTables NULL,NULL,NULL,NULL,NULL,NULL - returns all tables with all columns in all databases in the server
 exec spSearchTables 'North%','d%',NULL,NULL,NULL,NULL - returns all tables with all columns in all databases starting with North% and having d% in the schema in the server
 exec spSearchTables 'North%',NULL,'S%',NULL,NULL,NULL - returns tables starting with S% with all columns in databases starting with North% in the server
@@ -223,5 +223,6 @@ UPDATE #Output
 SET [MatchingSelect]=REPLACE([MatchingSelect],'[??]',[MatchingWhereColumns]+',*')
 
 SELECT [Database],[Schema],[Table],[FullTableName],[MatchingColumns],[MatchingSelect] FROM #Output
+ORDER BY [FullTableName]
 
 END

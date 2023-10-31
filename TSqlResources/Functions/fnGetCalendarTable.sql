@@ -10,6 +10,9 @@ PARAMETERS:
 OUTPUT:
 	- A calendar table
 
+USAGE:
+SELECT * FROM fnGetCalendarTable('2020-08-12T08:01:33.123456','2020-08-13T09:15:22',10) OPTION (MAXRECURSION 0)
+
 VERSION HISTORY:
   20161001	fededim		Initial Release
  
@@ -24,7 +27,10 @@ CREATE OR ALTER FUNCTION fnGetCalendarTable
  RETURN 
   WITH seq(n,ts) AS 
 	(
-	  SELECT 0,@startDate UNION ALL SELECT n+1,DATEADD(minute, (n+1)*@stepMin, @startDate) FROM seq
+	  SELECT 0,@startDate 
+	  UNION ALL 
+	  SELECT n+1,DATEADD(minute, (n+1)*@stepMin, @startDate)
+	  FROM seq
 	  WHERE  DATEADD(minute, (n+1)*@stepMin, @startDate)<=@endDate
 	)
 	SELECT
@@ -44,9 +50,7 @@ CREATE OR ALTER FUNCTION fnGetCalendarTable
 		[Second]	   = DATEPART(SECOND,ts),
 		[Millisecond]  = DATEPART(MILLISECOND,ts),
 		[Microsecond]  = DATEPART(MICROSECOND,ts)
-	  FROM seq
+	FROM seq
 -- ORDER BY [ts]
 -- OPTION (MAXRECURSION 0);
 
-
--- SELECT * FROM fnGetCalendarTable('2020-08-12T08:01:33.123456','2020-08-13T09:15:22',10) OPTION (MAXRECURSION 0)
