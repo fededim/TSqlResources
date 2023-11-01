@@ -172,7 +172,7 @@ BEGIN
 	BEGIN
 		SET @whereClause = NULL
 		SET @columnListSelect = NULL
-		SET @columnList = @columnList + N''MAX('''''' + @columnName + N'',''''),''
+		SET @columnList = @columnList + N'''''''' + @columnName + N'','''',''
 	END
 
 	SET @oldDbName = @dbName
