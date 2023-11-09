@@ -66,5 +66,6 @@
     <Build Include="Scripts\DbMaintenance.sql" />
     <Build Include="Scripts\QueryExcelCsv.sql" />
     <Build Include="Scripts\BackupDatabase.sql" />
+    <Build Include="SPs\spReapplyLoginToDatabases.sql" />
   </ItemGroup>
 </Project>
