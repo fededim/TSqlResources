@@ -12,6 +12,7 @@ A set of resources for Sql Server
 
 ### OUTPUT
 A log table with these columns:
+
 	- [Database]: database name to which the LogMessage applies
 	- [LogMessage]: the message logged during the execution
 
