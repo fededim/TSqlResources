@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************************
-© 2020	Federico Di Marco <fededim@gmail.com> (initially implemented in 2008 with older version Microsoft Access Database Engine)
+© 2016	Federico Di Marco <fededim@gmail.com> (initially implemented in 2008 with older version Microsoft Access Database Engine)
 QueryExcelCsv - An example script which can be used to query CSV or XSLX files directly in Sql Management Studio without importing them into tables
 
 PARAMETERS:
