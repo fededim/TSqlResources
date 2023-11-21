@@ -1,4 +1,4 @@
-# TSqlResources
+# TSqlResources © 2005-current Federico Di Marco
 A set of resources for Sql Server
 
 
