@@ -1,8 +1,24 @@
-# TSqlResources
+# TSqlResources © 2005-current Federico Di Marco
 A set of resources for Sql Server
 
 
 # Stored Procedures (SPs folder)
+
+## [spReapplyLoginToDatabases.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/SPs/spReapplyLoginToDatabases.sql)
+
+### Parameters
+	- @loginname: a SQL LIKE pattern to specify the login (only the first match is taken)
+	- @grantExecute: a BIT which specifies whether to grant the execute permission on stored procedure for the user
+
+### OUTPUT
+A log table with these columns:
+
+	- [Database]: database name to which the LogMessage applies
+	- [LogMessage]: the message logged during the execution
+
+### USAGE
+	- exec spReapplyLoginToDatabases 'test' -- recreates the user for the test login in all databases of the server with db_datareader and db_datawriter role
+	- exec spReapplyLoginToDatabases 'test',1 -- recreates the user for the test login in all databases of the server with db_datareader and db_datawriter role and grants also the permission to execute the stored procedures
 
 ## [spSearchTables.sql](https://github.com/fededim/TSqlResources/blob/master/TSqlResources/SPs/spSearchTables.sql)
 
