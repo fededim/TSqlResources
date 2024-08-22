@@ -1,8 +1,7 @@
 ﻿/*********************************************************************************************
 © 2016	Federico Di Marco <fededim@gmail.com>
 spReapplyLoginToDatabases - A helper stored procedure which recreates/restores the database user 
-with db_datareader and db_datawriter roles and optionally the grant to execute the stored procedures for the specified login 
-for all databases in a server.
+with db_datareader and db_datawriter roles and optionally the grant to execute the stored procedures for the specified login for all databases in a server.
 
 PARAMETERS:
 	- @loginname: a SQL LIKE pattern to specify the login (only the first match is taken)
@@ -14,8 +13,10 @@ A log table with these columns:
   - [LogMessage]: the message logged during the execution
 
 USAGE:
-exec spReapplyLoginToDatabases 'test' -- recreates the user for the test login in all databases of the server with db_datareader and db_datawriter role
-exec spReapplyLoginToDatabases 'test',1 -- recreates the user for the test login in all databases of the server with db_datareader and db_datawriter role and grants also the permission to execute the stored procedures
+exec spReapplyLoginToDatabases 'DOMAIN\USER' -- for windows authentication
+exec spReapplyLoginToDatabases 'USER' -- for sql server authentication
+exec spReapplyLoginToDatabases 'test' -- recreates all the sql server users for the test login in all databases of the server with db_datareader and db_datawriter role
+exec spReapplyLoginToDatabases 'test',1 -- recreates all the sql server users for the test login in all databases of the server with db_datareader and db_datawriter role and grants also the permission to execute the stored procedures
 
 VERSION HISTORY:
   20161001	fededim		Initial Release
